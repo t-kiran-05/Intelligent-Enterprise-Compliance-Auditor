@@ -707,9 +707,31 @@ export default function DocumentAuditor() {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [queueDocs, setQueueDocs] = useState<AuditDocument[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [retrySeconds, setRetrySeconds] = useState<number>(0);
+  const [lastFile, setLastFile] = useState<File | null>(null);
 
-  const API_BASE = "https://vbkod6j4wc.execute-api.us-east-1.amazonaws.com";
+  const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
   const pollIntervalRef = useRef<number | null>(null);
+  const retryTimeoutRef = useRef<number | null>(null);
+
+  const isRetryableError = (message: string) => /429|rate limit|too many requests|throttl|temporar|503|unavailable/i.test(message);
+
+  const clearRetryTimer = () => {
+    if (retryTimeoutRef.current) {
+      window.clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+  };
+
+  const scheduleRetry = (delayMs: number, onRetry: () => void) => {
+    clearRetryTimer();
+    const seconds = Math.max(1, Math.ceil(delayMs / 1000));
+    setRetrySeconds(seconds);
+    retryTimeoutRef.current = window.setTimeout(() => {
+      setRetrySeconds(0);
+      onRetry();
+    }, delayMs);
+  };
 
   const handleAgreementFiles = async (files: File[]) => {
     const groupId = `agreement-${Date.now().toString(36)}`;
@@ -987,8 +1009,28 @@ export default function DocumentAuditor() {
 
     } catch (err: any) {
       console.error(err);
-      setErrorMessage(err?.message || "Pipeline execution failed.");
+      const rawMessage = err?.message || "Pipeline execution failed.";
+      setErrorMessage(rawMessage);
+      if (isRetryableError(rawMessage)) {
+        const delayMs = 3000 + Math.random() * 2000;
+        scheduleRetry(delayMs, () => {
+          if (lastFile) handleFileUpload(lastFile);
+        });
+      }
       setStatus("failed");
+    }
+  };
+
+  useEffect(() => () => {
+    clearRetryTimer();
+    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+  }, []);
+
+  const retryUpload = () => {
+    clearRetryTimer();
+    setRetrySeconds(0);
+    if (lastFile) {
+      handleFileUpload(lastFile);
     }
   };
 
@@ -1023,8 +1065,22 @@ export default function DocumentAuditor() {
         )}
 
         {status === "failed" && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-700 font-medium">
-            ❌ Process Failure: {errorMessage}
+          <div className="space-y-3 p-4 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-700 font-medium">
+            <div className="flex items-center justify-between gap-3">
+              <span>❌ Process Failure: {errorMessage}</span>
+              {lastFile && isRetryableError(errorMessage) && (
+                <button
+                  type="button"
+                  onClick={retryUpload}
+                  className="rounded-md border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                >
+                  Retry {retrySeconds > 0 ? `in ${retrySeconds}s` : "now"}
+                </button>
+              )}
+            </div>
+            {retrySeconds > 0 && (
+              <p className="text-xs text-rose-600">Retrying automatically in {retrySeconds} seconds because the API is rate-limiting requests.</p>
+            )}
           </div>
         )}
       </div>
