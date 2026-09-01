@@ -20,10 +20,12 @@ resource "aws_s3_bucket_cors_configuration" "document_vault_cors" {
 
     allowed_origins = [
       "http://localhost:3000",
-      "https://your-app.vercel.app",
-      "https://intelligent-enterprise-compliance-auditor.vercel.app"
+      "https://ai-powered-enterprise-compliance-auditor-4pyf7aleu.vercel.app",
+      "https://intelligent-enterprise-compliance-auditor.vercel.app",
+      "*" # Recommended during testing to avoid preview branch issues
     ]
-    allowed_headers = ["content-type"]
+    #allowed_headers = ["content-type"]
+    allowed_headers = ["*"]
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }
@@ -185,8 +187,9 @@ resource "aws_apigatewayv2_api" "http_api" {
     allow_methods = ["GET", "POST", "OPTIONS", "PUT"]
     allow_origins = [
       "http://localhost:3000",
-      "https://ai-powered-enterprise-compliance-auditor-5197xg7mn.vercel.app",
-      "https://intelligent-enterprise-compliance-auditor.vercel.app"
+      "https://ai-powered-enterprise-compliance-auditor-4pyf7aleu.vercel.app",
+      "https://intelligent-enterprise-compliance-auditor.vercel.app",
+      "*" # Recommended during testing
     ]
     max_age = 300
   }
