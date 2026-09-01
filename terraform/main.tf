@@ -184,8 +184,8 @@ resource "aws_apigatewayv2_api" "http_api" {
     allow_headers = ["content-type", "authorization", "accept"]
     allow_methods = ["GET", "POST", "OPTIONS", "PUT"]
     allow_origins = [
-      "https://your-app.vercel.app",
-      "https://www.your-app.vercel.app"
+      "http://localhost:3000",
+      "https://intelligent-enterprise-compliance-auditor.vercel.app"
     ]
     max_age = 300
   }

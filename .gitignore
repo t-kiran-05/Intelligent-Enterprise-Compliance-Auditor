@@ -14,10 +14,12 @@ node_modules
 .next/
 .DS_Store
 .venv/
+__pycache__/
 
 # Terraform - exclude state files and sensitive deployments
 .terraform/
 terraform/.terraform/
+terraform/.terraform.lock.hcl
 terraform/terraform.tfstate*
 terraform/lambda_src/
 terraform/lambda_function.zip
