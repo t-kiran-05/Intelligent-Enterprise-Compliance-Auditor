@@ -12,8 +12,13 @@ __v0_jsx-dev-runtime.ts
 # Common ignores
 node_modules
 .next/
-.DS_Storeterraform/.terraform/
+.DS_Store
 .venv/
-terraform/
+
+# Terraform - exclude state files and sensitive deployments
 .terraform/
-.venv/
+terraform/.terraform/
+terraform/terraform.tfstate*
+terraform/lambda_src/
+terraform/lambda_function.zip
+terraform/*.tfstate*
