@@ -60,7 +60,7 @@ Everything runs on pay-per-use infrastructure — there's no server sitting idle
 
 <table>
 <tr>
-<td width="500%">
+<td width="50%">
 
 **Compliance Overview**
 Real-time gauges, ingestion pipeline, and a live audit stream as documents move through the pipeline.
@@ -86,7 +86,7 @@ Every document scored across ten risk categories, color-coded from Low to Critic
 ![Risk Heatmap](./screenshots/risk-heatmap.png)
 
 </td>
-<td width="500%">
+<td width="50%">
 
 **Clause Review — Original vs. AI Recommendation**
 Side-by-side redlines with a rationale for each flagged clause — apply or dismiss with one click.
